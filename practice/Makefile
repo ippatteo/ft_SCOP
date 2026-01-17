@@ -2,8 +2,10 @@ NAME := practice
 CXX ?= c++
 CXXFLAGS := -Wall -Wextra -Werror -std=c++17
 
-SRC := main.cpp
-OBJ := $(SRC:.cpp=.o)
+SRC_DIRS := src lib
+SRC := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.cpp))
+OBJ_DIR := object
+OBJ := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRC))
 
 GLFW_DIR := libs/glfw
 GLFW_BUILD_DIR := $(GLFW_DIR)/build
@@ -35,7 +37,8 @@ docker-shell:
 $(NAME): $(OBJ) $(GLFW_LIB)
 	$(CXX) $(CXXFLAGS) $(OBJ) $(LDFLAGS) -o $@
 
-%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) -c $(CXXFLAGS) $(GLFW_INCLUDE) $< -o $@
 
 $(GLFW_LIB):
@@ -44,7 +47,7 @@ $(GLFW_LIB):
 	cmake --build $(GLFW_BUILD_DIR)
 
 clean:
-	rm -f $(OBJ)
+	rm -rf $(OBJ_DIR)
 
 fclean: clean
 	rm -f $(NAME)

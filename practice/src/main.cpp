@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "libs/glfw/include/GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 #ifdef __linux__
 # define GL_GLEXT_PROTOTYPES
