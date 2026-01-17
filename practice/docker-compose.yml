@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  builder:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace:rw
+    working_dir: /workspace
