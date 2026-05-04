@@ -1,82 +1,62 @@
-# GLFW quick reference for SCOP
+# GLFW consentita in SCOP: funzioni essenziali
 
-Questa breve guida raccoglie le funzioni di GLFW più utili per soddisfare i requisiti del progetto SCOP: finestra e contesto OpenGL, gestione input/eventi e controllo del rendering.
+Il confine del subject e corretto: in SCOP e consentita la gestione di finestra, eventi e contesto OpenGL, mentre restano da implementare internamente matematica 3D, shader e caricamento asset.
 
-## 1. inizializzazione e chiusura
-- `int glfwInit(void)`
-  - Deve essere chiamata per prima. Restituisce 0 se l'inizializzazione fallisce (es. librerie mancanti).
-- `void glfwTerminate(void)`
-  - Rilascia tutte le risorse allocate da GLFW. Richiamala prima di uscire dal programma.
-- `void glfwSetErrorCallback(GLFWerrorfun cbfun)`
-  - Registra una funzione che riceve codice e descrizione dell'errore, utile per il debug durante la difesa.
+La buona notizia e questa: puoi usare tecnicamente tutta GLFW, perche e una libreria pensata proprio per finestra, input, eventi e contesto OpenGL. Non fornisce utility per matrici 3D, parser OBJ o compilazione shader ad alto livello.
 
-## 2. creazione della finestra / contesto
-- `void glfwWindowHint(int hint, int value)`
-  - Imposta proprietà del contesto prima di creare la finestra (es. `GLFW_CONTEXT_VERSION_MAJOR`, `GLFW_OPENGL_PROFILE`, `GLFW_SAMPLES` per MSAA, `GLFW_RESIZABLE`).
-- `GLFWwindow *glfwCreateWindow(int width, int height, const char *title, GLFWmonitor *monitor, GLFWwindow *share)`
-  - Crea la finestra principale. Puoi passare `NULL` per monitor/ share se non ti servono fullscreen o context sharing.
-- `void glfwMakeContextCurrent(GLFWwindow *window)`
-  - Associa il contesto della finestra al thread corrente; chiamala prima di iniziare a fare chiamate OpenGL.
-- `void glfwSwapInterval(int interval)`
-  - Imposta il V-Sync (1 = sincronizzato, 0 = disattivato). Utile per evitare tearing durante la rotazione dell’oggetto.
+Di seguito trovi solo le funzioni fondamentali e sicure da usare nel progetto.
 
-## 3. ciclo principale ed eventi
-- `int glfwWindowShouldClose(GLFWwindow *window)`
-  - Restituisce un flag che indica se la finestra deve chiudere; usalo come condizione del loop principale.
-- `void glfwPollEvents(void)`
-  - Processa tutti gli eventi pendenti (tastiera, mouse, finestra). Va chiamato una volta per frame.
-- `void glfwSwapBuffers(GLFWwindow *window)`
-  - Scambia i buffer della finestra (double buffering) dopo aver renderizzato il frame.
+## 1. Inizializzazione e Terminazione
 
-## 4. input da tastiera e mouse
-- `void glfwSetKeyCallback(GLFWwindow *window, GLFWkeyfun cbfun)`
-  - Callback per tasti premuti, rilasciati o ripetuti. Perfetto per:
-    - Traslazioni sull’asse X/Y/Z
-    - Cambio modalità colore/texture
-    - Toggle smooth shading / wireframe
-- `void glfwSetCursorPosCallback(GLFWwindow *window, GLFWcursorposfun cbfun)`
-  - Traccia l’orientamento della camera usando il mouse (pitch/yaw) se vuoi un controllo più naturale.
-- `int glfwGetKey(GLFWwindow *window, int key)`
-  - Query immediate dello stato di un tasto; utile per input continuo (es. movimento mentre la finestra riceve focus).
-- `void glfwSetInputMode(GLFWwindow *window, int mode, int value)`
-  - Permette di nascondere o bloccare il cursore (`GLFW_CURSOR_DISABLED`) durante il volo della camera.
+- `glfwInit()`
+  - Inizializza la libreria GLFW. Va chiamata all'avvio.
+- `glfwTerminate()`
+  - Rilascia le risorse GLFW e chiude correttamente il framework.
 
-## 5. tempo e animazioni
-- `double glfwGetTime(void)`
-  - Restituisce i secondi dal momento dell’inizializzazione. Usalo per:
-    - Calcolare delta time tra frame
-    - Aggiornare la rotazione dell’oggetto attorno all’asse centrale
-    - Mostrare FPS (1 / delta)
+## 2. Gestione della Finestra e del Contesto
 
-## 6. callback aggiuntive
-- `void glfwSetFramebufferSizeCallback(GLFWwindow *window, GLFWframebuffersizefun cbfun)`
-  - Aggiorna `glViewport` quando la finestra cambia dimensione, così la proiezione prospettica resta corretta.
-- `void glfwSetScrollCallback(GLFWwindow *window, GLFWscrollfun cbfun)`
-  - Usa la rotella per zoom/scaling sull’oggetto.
-- `void glfwSetMouseButtonCallback(GLFWwindow *window, GLFWmousebuttonfun cbfun)`
-  - Gestisce click specifici (es. selezione o toggle interfaccia).
+- `glfwWindowHint()`
+  - Imposta i parametri del contesto prima della creazione della finestra (esempio: versione OpenGL e profilo Core).
+- `glfwCreateWindow()`
+  - Crea la finestra principale.
+- `glfwDestroyWindow()`
+  - Distrugge la finestra quando non serve piu.
+- `glfwMakeContextCurrent()`
+  - Associa il contesto OpenGL alla finestra corrente.
+- `glfwSwapBuffers()`
+  - Scambia front/back buffer dopo il rendering del frame.
+- `glfwWindowShouldClose()`
+  - Verifica se la finestra deve essere chiusa (ad esempio click su X).
+- `glfwSetWindowShouldClose()`
+  - Imposta la chiusura programmatica della finestra (esempio: tasto ESC).
 
-## 7. monitor, fullscreen e finestre multiple
-- `GLFWmonitor **glfwGetMonitors(int *count)` / `GLFWmonitor *glfwGetPrimaryMonitor(void)`
-  - Recuperano i monitor disponibili. Puoi passare un monitor a `glfwCreateWindow` per fullscreen.
-- `const GLFWvidmode *glfwGetVideoMode(GLFWmonitor *monitor)`
-  - Restituisce risoluzione/refresh del monitor: utile per impostare correttamente un fullscreen mode.
+## 3. Gestione Eventi e Loop
 
-## 8. joystick e gamepad (opzionale)
-- `int glfwJoystickPresent(int jid)` e `const float *glfwGetJoystickAxes(int jid, int *count)`
-  - Permettono di aggiungere movimento con gamepad (bonus o controlli alternativi).
+- `glfwPollEvents()`
+  - Elabora gli eventi pendenti (tastiera, mouse, finestra). Va chiamata nel loop principale.
 
-## 9. terminazione e pulizia
-- `void glfwSetWindowShouldClose(GLFWwindow *window, int value)`
-  - Puoi settare il flag di chiusura dall’interno di un callback (es. tasto ESC).
-- `void glfwDestroyWindow(GLFWwindow *window)`
-  - Chiama questa funzione quando la finestra non serve più (prima di `glfwTerminate`).
+## 4. Input (Tastiera e Mouse)
 
-## suggerimenti per SCOP
-1. **Pipeline**: `glfwInit` → window hints → `glfwCreateWindow` → `glfwMakeContextCurrent` → caricare le funzioni GL (GLAD o altro) → configurare callback → loop (`glfwPollEvents`, render, `glfwSwapBuffers`).
-2. **Input**: usa `glfwSetKeyCallback` per toggle texture/colore, cambio shading, reset rotazione. Per movimenti fluidi combina callback e `glfwGetKey` nel loop.
-3. **Delta time**: misura `double now = glfwGetTime(); dt = now - last;` per ruotare senza dipendere dagli FPS.
-4. **Multi-window/debug**: puoi aprire una finestra secondaria per visualizzare HUD o buffer di debug se necessario, riutilizzando le stesse funzioni.
-5. **Requisiti**: con GLFW gestisci solo finestra ed eventi (consentito). Parser OBJ, matrici e shader restano sviluppati internamente come richiesto.
+- `glfwGetKey()`
+  - Legge lo stato corrente di un tasto. Utile per movimento continuo.
+- `glfwSetKeyCallback()`
+  - Registra callback per pressione/rilascio tasti. Utile per toggle (esempio texture on/off).
+- `glfwSetCursorPosCallback()`
+  - Callback per il movimento del mouse.
+- `glfwGetCursorPos()`
+  - Legge la posizione corrente del cursore.
 
-Con questo riferimento puoi mappare rapidamente ogni requisito del soggetto SCOP alle chiamate GLFW corrispondenti, mantenendo il progetto entro i vincoli (nessuna libreria esterna per geometria, solo window+input).
+## 5. Gestione del Tempo
+
+- `glfwGetTime()`
+  - Restituisce i secondi trascorsi dall'avvio di GLFW. Base per delta time e animazioni indipendenti dagli FPS.
+
+## 6. Funzione Extra Utile
+
+- `glfwSetFramebufferSizeCallback()`
+  - Callback invocata al resize della finestra. Serve per aggiornare `glViewport` e mantenere la proiezione corretta.
+
+## Nota pratica per SCOP
+
+- Con queste API resti nel perimetro consentito dal subject.
+- Parser OBJ, algebra lineare (vettori/matrici), camera e shader management restano implementati da te.
